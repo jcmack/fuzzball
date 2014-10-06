@@ -20,6 +20,17 @@
 
         <p class="view"><a href="https://github.com/jcmack/fuzzball">View the Project on GitHub <small>jcmack/fuzzball</small></a></p>
 
+          <script src="http://cdn.peerjs.com/0.3/peer.js"></script>
+          <script>
+              var peer = new Peer('customid', {key: 'lwjd5qra8257b9'});
+              peer.on('open', function(id) {
+                  console.log('My peer ID is: ' + id);
+              });
+
+              peer.on('error', function(err) {
+                  console.log(err.type);
+              });
+          </script>
 
         <ul>
           <li><a href="https://github.com/jcmack/fuzzball/zipball/master">Download <strong>ZIP File</strong></a></li>
