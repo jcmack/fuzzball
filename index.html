@@ -4,8 +4,22 @@
     <title>Project Fuzzball by jcmack</title>
   </head>
   <body>
-           <script src="http://cdn.peerjs.com/0.3/peer.js"></script>
+  <div class="pure-form">
+      <input type="text" placeholder="Connect user id..." id="peer-id">
+      <button type="submit" id="connect-button">Connect</button>
+  </div>
+
+  <div class="pure-form">
+      <input type="text" placeholder="Write something here..." id="chat-msg">
+      <button type="submit" id="send-msg">Send</button>
+  </div>
+          <script src="http://cdn.peerjs.com/0.3/peer.js"></script>
+          <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
           <script>
+              // Compatibility shim
+              navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia
+                      || navigator.mozGetUserMedia;
+
               var peer = new Peer({key: 'lwjd5qra8257b9'});
               peer.on('open', function(id) {
                   console.log('My peer ID is: ' + id);
@@ -14,6 +28,34 @@
               peer.on('error', function(err) {
                   console.log(err.type);
               });
+
+              var peerConn;
+              $(function() {
+                  $('#connect-button').click(function () {
+                      var peerId = $('#peer-id').val();
+                      console.log('Connecting to ' + peerId + "...");
+                      peerConn = peer.connect(peerId);
+                  });
+              });
+
+              $(function() {
+                  $('#send-msg').click(function () {
+                      peerConn.send($('#chat-msg').val());
+                  });
+              });
+
+              //receive the data
+              peer.on('connection', function(conn) {
+                  if(peerConn == null) {
+                      var peerId = conn.peer;
+                      console.log("New data connection from " + peerId);
+                      peerConn = peer.connect(peerId);
+                  }
+                  conn.on('data', function(data){
+                      console.log(data);
+                  });
+              });
+
           </script>
     
   </body>

@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+    <title>Project Fuzzball by jcmack</title>
+</head>
+<body>
+<div class="pure-form">
+    <input type="text" placeholder="Call user id..." id="call-to-id">
+    <button type="submit" id="make-call">Call</button>
+</div>
+<script src="http://cdn.peerjs.com/0.3/peer.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+<script>
+    // Compatibility shim
+    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia
+            || navigator.mozGetUserMedia;
+
+    var peer = new Peer({key: 'lwjd5qra8257b9'});
+    peer.on('open', function(id) {
+        console.log('My peer ID is: ' + id);
+    });
+
+    peer.on('error', function(err) {
+        console.log(err.type);
+    });
+
+    $(function() {
+        $('#make-call').click(function () {
+            // Initiate a call!
+            console.log($('#call-to-id').val());
+            var call = peer.call($('#call-to-id').val(), window.localStream);
+
+        });
+    });
+
+</script>
+
+</body>
+</html>
