@@ -4,33 +4,151 @@
     <title>Project Fuzzball by jcmack</title>
 </head>
 <body>
+
+<video id="my-video" width="25%" height="25%" muted="true" autoplay></video>
+<label for="my-id">Your ID: </label>
+<input type="text" placeholder="" id="my-id">
+
+<br>
+<video id="peer-video" width="25%" height="25%" autoplay></video>
+<br>
+<button type="submit" id="start-media-button">Start media</button>
+<button type="submit" id="end-media-button">End media</button>
 <div class="pure-form">
-    <input type="text" placeholder="Call user id..." id="call-to-id">
-    <button type="submit" id="make-call">Call</button>
+    <input type="text" placeholder="Connect to peer ..." id="peer-id">
+    <button type="submit" id="connect-button">Connect</button>
 </div>
+
+<div class="pure-form">
+    <textarea rows="4" cols="50" id="chat-box"></textarea>
+    <br>
+    <input type="text" placeholder="Write something here..." id="chat-msg">
+    <button type="submit" id="send-msg">Send</button>
+</div>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
 <script src="http://cdn.peerjs.com/0.3/peer.js"></script>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+
 <script>
-    // Compatibility shim
+    // compatibility shim
     navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia
             || navigator.mozGetUserMedia;
 
     var peer = new Peer({key: 'lwjd5qra8257b9'});
     peer.on('open', function(id) {
         console.log('My peer ID is: ' + id);
+        $('#my-id').val(id);
     });
 
-    peer.on('error', function(err) {
-        console.log(err.type);
+    $('#my-id').keypress(function (e) {
+        if (e.which == 13) {
+            var newId = $('#my-id').val();
+            if(peer.id != newId){
+                peer.destroy();
+                peer = new Peer(newId, {key: 'lwjd5qra8257b9'});
+                console.log('My peer ID is: ' + peer.id);
+            }
+        }
     });
 
-    $(function() {
-        $('#make-call').click(function () {
-            // Initiate a call!
-            console.log($('#call-to-id').val());
-            var call = peer.call($('#call-to-id').val(), window.localStream);
+    navigator.getUserMedia({audio: true, video: true}, function (stream) {
+        $('#my-video').prop('src', URL.createObjectURL(stream));
+        window.localStream = stream;
+    }, function () {
+    });
 
+
+
+    //determine message timestamp in local browser time
+    function getTimestamp(){
+        var t = new Date();
+        var l = [ t.getMonth() + 1, "/", t.getDate(), " ", t.getHours(), ":",
+            t.getMinutes(), ":", t.getSeconds() ];
+        return    (t.getMonth() + 1) + "/" +  + " "
+                + t.getHours() + ":" + t.getMinutes()
+                + ":" + t.getSeconds();
+    }
+
+    function sendMsg() {
+        var chatMsg = $('#chat-msg').val();
+        //clear text
+        $('#chat-msg').val("");
+        //send message to peer
+        peerConn.send(chatMsg);
+        //update chat box window with your message and scroll to the top
+        $('#chat-box').val($('#chat-box').val() + "\n" + "ME: " + chatMsg);
+        $('#chat-box').scrollTop($('#chat-box')[0].scrollHeight);
+    }
+
+    function startMediaSession (call) {
+        console.log("starting media session...");
+        // Hang up on an existing call if present
+        if (window.existingCall) {
+            window.existingCall.close();
+        }
+
+        // Wait for stream on the call, then set peer video display
+        call.on('stream', function (stream) {
+            $('#peer-video').prop('src', URL.createObjectURL(stream));
         });
+    }
+
+    var peerConn;
+    $(function() {
+        //connect to peer
+        $('#connect-button').click(function () {
+            var peerId = $('#peer-id').val().trim();
+            $('#peer-id').val("");
+            console.log('Connecting to ' + peerId + "...");
+            peerConn = peer.connect(peerId);
+
+            //check for connection errors: peer-unavailable
+            peer.on('error', function(err) {
+                console.log(err.type);
+            });
+        });
+    });
+
+    //send chat msg to peer via enter key
+    $('#chat-msg').keypress(function (e) {
+        if (e.which == 13) {
+            $('#send-msg').click(sendMsg());
+        }
+    });
+
+    //send chat msg to peer via send button
+    $('#send-msg').on("click", sendMsg);
+
+    //receive the chat msg
+    peer.on('connection', function(conn) {
+        if(peerConn == null) {
+            var peerId = conn.peer;
+            console.log("New data connection from " + peerId);
+            peerConn = peer.connect(peerId);
+        }
+        conn.on('data', function(chatMsg){
+            $('#chat-box').val($('#chat-box').val() + "\n" + "PEER: " + chatMsg);
+            $('#chat-box').scrollTop($('#chat-box')[0].scrollHeight);
+            console.log(chatMsg);
+        });
+    });
+
+
+    $(function(){
+        $('#start-media-button').click(function(){
+            var call = peer.call(peerConn.peer, window.localStream);
+            startMediaSession(call);
+        });
+    });
+
+    // Receiving a call
+    peer.on('call', function(call){
+        call.answer(window.localStream);
+        startMediaSession(call);
+
     });
 
 </script>
