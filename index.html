@@ -26,6 +26,7 @@
           <button type="submit" id="send-msg">Send</button>
       </div>
 
+
       <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
@@ -33,7 +34,7 @@
       <script src="http://cdn.peerjs.com/0.3/peer.js"></script>
 
       <script>
-
+          'use strict';
           function start() {
               var toolbox = document.getElementById('toolbox');
               Blockly.inject(document.getElementById('blocklyDiv'),
