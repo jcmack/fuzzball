@@ -33,7 +33,7 @@ commands:
 	showmacs  	<bridge>		show a list of mac addrs
 	showstp   	<bridge>		show bridge stp info
 	stp       	<bridge> {on|off}	turn stp on/off
-'''	
+```	
 
 Show all of the current linux bridges on the system:
 ```
@@ -43,7 +43,8 @@ qbrdb90fd6f-90		8000.4220b6ce9615	no		qvbdb90fd6f-90
 							tapdb90fd6f-90
 ```
 Verify the linux bridge is up to be used by tcpdump
-'''	
+
+```	
 [root@ovn86-18 ~]# ifconfig | grep qbrdb90fd6f-90
 qbrdb90fd6f-90 Link encap:Ethernet  HWaddr 42:20:B6:CE:96:15  
 ```
